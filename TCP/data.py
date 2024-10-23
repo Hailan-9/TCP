@@ -6,6 +6,7 @@ from torch.utils.data import Dataset
 from torchvision import transforms as T
 
 from TCP.augment import hard as augmenter
+# 功能：加载和处理raw数据，使得成为训练batch使用的数据
 
 class CARLA_Data(Dataset):
 
@@ -46,6 +47,8 @@ class CARLA_Data(Dataset):
 		self.only_ap_brake = []
 
 		for sub_root in data_folders:
+			# TODO
+			# data其实是通过索引到文件夹下的packed_data.npy数据包，大小为22的dict
 			data = np.load(os.path.join(sub_root, "packed_data.npy"), allow_pickle=True).item()
 
 			self.x_command += data['x_target']
@@ -109,7 +112,7 @@ class CARLA_Data(Dataset):
 			local_command_point = np.array([self.future_y[index][i]-ego_y, self.future_x[index][i]-ego_x] )
 			local_command_point = R.T.dot(local_command_point)
 			waypoints.append(local_command_point)
-
+		# TODO
 		data['waypoints'] = np.array(waypoints)
 
 		data['action'] = self.action[index]

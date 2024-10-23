@@ -198,9 +198,9 @@ class TCPAgent(autonomous_agent.AutonomousAgent):
 										torch.FloatTensor([tick_data['target_point'][1]])]
 		target_point = torch.stack(tick_data['target_point'], dim=1).to('cuda', dtype=torch.float32)
 		state = torch.cat([speed, target_point, cmd_one_hot], 1)
-
+		#-----------------------------------------------------------开始预测--------------------------------------------------
 		pred= self.net(rgb, state, target_point)
-
+		# 两个动作合并
 		steer_ctrl, throttle_ctrl, brake_ctrl, metadata = self.net.process_action(pred, tick_data['next_command'], gt_velocity, target_point)
 
 		steer_traj, throttle_traj, brake_traj, metadata_traj = self.net.control_pid(pred['pred_wp'], gt_velocity, target_point)
@@ -239,9 +239,13 @@ class TCPAgent(autonomous_agent.AutonomousAgent):
 		self.last_steers.append(abs(float(control.steer)))
 		#chech whether ego is turning
 		# num of steers larger than 0.1
+		'''
+		看当前是不是在转弯
+		在转弯的话,就把status设置为1---->意味着两种控制方法的权重分配问题 216~227
+		'''
 		num = 0
 		for s in self.last_steers:
-			if s > 0.10:
+			if  s > 0.10:
 				num += 1
 		if num > 10:
 			self.status = 1

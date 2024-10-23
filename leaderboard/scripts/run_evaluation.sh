@@ -19,7 +19,7 @@ export RESUME=True
 
 # TCP evaluation
 export ROUTES=leaderboard/data/evaluation_routes/routes_lav_valid.xml
-export TEAM_AGENT=team_code/tcp_agent.py
+export TEAM_AGENT=team_code/tcp_agent.py # TODO
 export TEAM_CONFIG= PATH_TO_MODEL_CKPT
 export CHECKPOINT_ENDPOINT=results_TCP.json
 export SCENARIOS=leaderboard/data/scenarios/all_towns_traffic_scenarios.json

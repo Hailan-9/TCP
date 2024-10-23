@@ -1,3 +1,4 @@
+# ResNet相关的代码
 import torch
 from torch import Tensor
 import torch.nn as nn
@@ -22,7 +23,7 @@ model_urls = {
     'wide_resnet101_2': 'https://download.pytorch.org/models/wide_resnet101_2-32ee1156.pth',
 }
 
-
+# 创建一个3x3的卷积层 卷积核大小为3*3 参数分别是输入通道数，输出通道数，步长，卷积核大小等
 def conv3x3(in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, dilation: int = 1) -> nn.Conv2d:
     """3x3 convolution with padding"""
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
@@ -33,8 +34,11 @@ def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv2d:
     """1x1 convolution"""
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
 
-
+# 继承自 nn.Module（PyTorch 中的基本模块类），用于构建神经网络的某个基本块。
+# 意味着 BasicBlock 是一个神经网络模块，能够使用 PyTorch 提供的各种功能。
 class BasicBlock(nn.Module):
+    # 这是一个类属性，表示扩展因子（或扩展比例）。在许多深度学习模型中，尤其是残差网络（ResNet）和类似架构中，扩展因子用于控制特征图的维度变化。它可以指示如何扩展（或增加）输出通道的数量。
+    # int是类型提示 =1是默认值 通常意味着在没有额外扩展的情况下，输入和输出通道的数量是相同的。
     expansion: int = 1
 
     def __init__(
@@ -48,6 +52,7 @@ class BasicBlock(nn.Module):
         dilation: int = 1,
         norm_layer: Optional[Callable[..., nn.Module]] = None
     ) -> None:
+        # super() 是一个内置函数，用于返回当前类的父类（超类）对象。它可以用来调用父类的方法，尤其是构造函数。
         super(BasicBlock, self).__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
@@ -82,7 +87,7 @@ class BasicBlock(nn.Module):
 
         return out
 
-
+# TODO
 class Bottleneck(nn.Module):
     # Bottleneck in torchvision places the stride for downsampling at 3x3 convolution(self.conv2)
     # while original implementation places the stride at the first 1x1 convolution(self.conv1)
@@ -237,18 +242,21 @@ class ResNet(nn.Module):
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
+        # 34的第四层输出
         x_layer4 = self.layer4(x)
-
+        # 平均池化
         x = self.avgpool(x_layer4)
+        # 打平
         x = torch.flatten(x, 1)
         x = self.fc(x)
-
+        # TODO
         return x, x_layer4
 
     def forward(self, x: Tensor) -> Tensor:
         return self._forward_impl(x)
 
-
+# 使用提前定义好的字典，从链接中加载模型
+# 一种调用已有模型较为通用的方法
 def _resnet(
     arch: str,
     block: Type[Union[BasicBlock, Bottleneck]],
@@ -269,6 +277,7 @@ def resnet18(pretrained: bool = False, progress: bool = True, **kwargs: Any) -> 
     r"""ResNet-18 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_.
 
+
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
@@ -276,10 +285,10 @@ def resnet18(pretrained: bool = False, progress: bool = True, **kwargs: Any) -> 
     return _resnet('resnet18', BasicBlock, [2, 2, 2, 2], pretrained, progress,
                    **kwargs)
 
-
 def resnet34(pretrained: bool = False, progress: bool = True, **kwargs: Any) -> ResNet:
     r"""ResNet-34 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_.
+
 
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
